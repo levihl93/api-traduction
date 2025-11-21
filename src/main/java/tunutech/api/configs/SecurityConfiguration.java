@@ -35,7 +35,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
-                        .requestMatchers("/health").permitAll()
+                        .requestMatchers("/test/health").permitAll()
                         .requestMatchers("/traductionapi/v1/ws-chat/**").permitAll()
                         .requestMatchers("/documents/avatars/**").permitAll()
                         .requestMatchers("/traductionapi/v1/documents/avatars/**").permitAll()
