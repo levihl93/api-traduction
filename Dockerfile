@@ -1,3 +1,5 @@
 FROM eclipse-temurin:17-jdk-jammy
-COPY target/*.jar app.jar
-CMD ["java", "-jar", "app.jar"]
+WORKDIR /app
+COPY . .
+RUN ./mvnw clean package -DskipTests
+CMD ["java", "-jar", "target/api-0.0.1-SNAPSHOT.jar"]
