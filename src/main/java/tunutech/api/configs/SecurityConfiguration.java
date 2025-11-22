@@ -35,12 +35,17 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
-                        .requestMatchers("/test/health").permitAll()
+                        // AJOUTEZ CES LIGNES POUR AUTORISER L'ACCÈS PUBLIC :
+                        .requestMatchers("/traductionapi/v1/test/**").permitAll()
+                        .requestMatchers("/traductionapi/v1/health").permitAll()
+                        .requestMatchers("/test/**").permitAll()
+                        .requestMatchers("/health").permitAll()
                         .requestMatchers("/traductionapi/v1/ws-chat/**").permitAll()
                         .requestMatchers("/documents/avatars/**").permitAll()
                         .requestMatchers("/traductionapi/v1/documents/avatars/**").permitAll()
                         .anyRequest().authenticated()
                 )
+
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -54,11 +59,13 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
+        configuration.setAllowedOriginPatterns(List.of("*"));
+
         // ✅ Ajoute toutes les origines nécessaires
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://192.168.1.6:3000"
-        ));
+       // configuration.setAllowedOrigins(List.of(
+           //     "http://localhost:3000",
+               // "http://192.168.1.6:3000"
+        //));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
