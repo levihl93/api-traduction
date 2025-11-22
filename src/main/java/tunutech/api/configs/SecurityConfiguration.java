@@ -36,10 +36,9 @@ public class SecurityConfiguration {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
                         // AJOUTEZ CES LIGNES POUR AUTORISER L'ACCÈS PUBLIC :
-                        .requestMatchers("/traductionapi/v1/test/**").permitAll()
-                        .requestMatchers("/traductionapi/v1/health").permitAll()
-                        .requestMatchers("/test/**").permitAll()
-                        .requestMatchers("/health").permitAll()
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/traductionapi/v1").permitAll()
+                        .requestMatchers("/traductionapi/v1/").permitAll()
                         .requestMatchers("/traductionapi/v1/ws-chat/**").permitAll()
                         .requestMatchers("/documents/avatars/**").permitAll()
                         .requestMatchers("/traductionapi/v1/documents/avatars/**").permitAll()
