@@ -58,17 +58,16 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
+        // ✅ UNIQUEMENT CETTE LIGNE - supprime setAllowedOrigins
         configuration.setAllowedOriginPatterns(List.of("*"));
 
-        // ✅ Ajoute toutes les origines nécessaires
-       // configuration.setAllowedOrigins(List.of(
-           //     "http://localhost:3000",
-               // "http://192.168.1.6:3000"
-        //));
+        // ✅ OU si tu veux être plus restrictif :
+        // configuration.setAllowedOriginPatterns(List.of("http://localhost:*", "http://192.168.*.*:*"));
 
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true); // utile si tu gères les cookies ou headers Authorization
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Origin", "Accept", "X-Requested-With"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

@@ -37,7 +37,6 @@ public class AuthenticationController {
     @Autowired
     private UserRepository userRepository;
 
-
     public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService, PasswordResetService resetService) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
@@ -72,29 +71,41 @@ public class AuthenticationController {
         return ResponseEntity.ok(userDto);
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody LoginUserDto loginUserDto) {
-
-        if (!authenticationService.loadByemail(loginUserDto.getEmail()).isPresent()) {
+        System.out.println("🔐 Tentative de connexion pour: " + loginUserDto.getEmail());
+        // Vérifier d'abord si l'utilisateur existe
+        Optional<User> userOptional = authenticationService.loadByemail(loginUserDto.getEmail());
+        System.out.println("📦 Utilisateur trouvé: " + userOptional.isPresent());
+        if (!userOptional.isPresent()) {
+            System.out.println("❌ Utilisateur non trouvé");
             Map<String, String> error = new HashMap<>();
             error.put("error", "Utilisateur non reconnu");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
+
+        User existingUser = userOptional.get();
+        System.out.println("👤 Utilisateur: " + existingUser.getEmail() + ", present: " + existingUser.isPresent() + ", active: " + existingUser.isActive());
         try {
+            System.out.println("🔄 Authentification en cours...");
             User authenticatedUser = authenticationService.authenticate(loginUserDto);
-            if(!authenticatedUser.isPresent())
-            {
+            System.out.println("✅ Authentification réussie");
+
+            // CORRECTION : Vérifier si l'utilisateur est présent (pas supprimé)
+            if(!existingUser.isPresent()) { // Utilise le champ boolean 'present' de ton User
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "your account is deleted");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
-            if(!authenticatedUser.isActive())
-            {
+
+            // CORRECTION : Vérifier si l'utilisateur est actif
+            if(!existingUser.isActive()) { // Utilise le champ boolean 'active' de ton User
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "your account is not actived");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
+
+            // Le reste de ton code inchangé
             UserDto userDto = new UserDto();
             userDto.setId(authenticatedUser.getId());
             userDto.setEmail(authenticatedUser.getEmail());
@@ -105,32 +116,31 @@ public class AuthenticationController {
             if (authenticatedUser.getRoleUser()==RoleUser.ADMIN) {
                 userDto.setAdmin(true);
             }
+
             if (authenticatedUser.getTraducteur() != null) {
-                if(authenticatedUser.getRoleUser()==RoleUser.ADMIN)
-                {
+                if(authenticatedUser.getRoleUser()==RoleUser.ADMIN) {
                     userDto.setSenderRole(SenderRole.ADMIN);
-                }else {
+                } else {
                     userDto.setSenderRole(SenderRole.TRANSLATOR);
                 }
                 Optional<Traducteur> traducteur=traducteurRepository.findById(authenticatedUser.getTraducteur().getId());
                 userDto.setIdTraducteur(authenticatedUser.getTraducteur().getId());
-                if(traducteur.isPresent())
-                {
+                if(traducteur.isPresent()) {
                     userDto.setName(traducteur.get().getFullName());
                 }
             } else if (authenticatedUser.getClient() != null) {
                 userDto.setSenderRole(SenderRole.CLIENT);
-                Optional<Client>client=clientRepository.findById(authenticatedUser.getClient().getId());
+                Optional<Client> client=clientRepository.findById(authenticatedUser.getClient().getId());
                 userDto.setIdClient(authenticatedUser.getClient().getId());
-                if(client.isPresent())
-                {
+                if(client.isPresent()) {
                     userDto.setName(client.get().getFullName());
                 }
-
             }
+
             String accessToken = jwtService.generateToken(authenticatedUser);
             String refreshToken = jwtService.generateRefreshToken(authenticatedUser);
             System.out.println("le user "+userDto.getAvatarUrl());
+
             LoginResponse loginResponse = new LoginResponse()
                     .setAccessToken(accessToken)
                     .setRefreshToken(refreshToken)
@@ -149,14 +159,12 @@ public class AuthenticationController {
             error.put("error", "User not found");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         } catch (Exception ex) {
+            ex.printStackTrace(); // ✅ IMPORTANT pour voir l'erreur
             Map<String, String> error = new HashMap<>();
-            error.put("error", "Une erreur est survenue");
+            error.put("error", "Une erreur est survenue: " + ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-
-
-
 
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@RequestParam String refreshToken) {
