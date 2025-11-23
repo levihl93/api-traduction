@@ -125,19 +125,15 @@ public class AuthenticationController {
                 Optional<Traducteur> traducteur=traducteurRepository.findById(authenticatedUser.getTraducteur().getId());
                 userDto.setIdTraducteur(authenticatedUser.getTraducteur().getId());
                 if(traducteur.isPresent()) {
-                    userDto.setName(traducteur.get().getFullName());
+                    userDto.setName(traducteur.get().getFirstname()+" "+traducteur.get().getLastname());
                 }
             } else if (authenticatedUser.getClient() != null) {
                 userDto.setSenderRole(SenderRole.CLIENT);
                 Optional<Client> client=clientRepository.findById(authenticatedUser.getClient().getId());
-                System.out.println("okkkkkk");
-                System.out.println(client.get().getFirstname());
-                System.out.println(client.get().getLastname());
-                System.out.println(client.get().getDenomination());
                 userDto.setIdClient(authenticatedUser.getClient().getId());
-                userDto.setName(client.get().getFullName());
+
                 if(client.isPresent()) {
-                    //userDto.setName(client.get().getFullName());
+                    userDto.setName(client.get().getFirstname()+" "+client.get().getLastname()+client.get().getDenomination());
                 }
             }
 
