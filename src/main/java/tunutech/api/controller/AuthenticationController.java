@@ -85,7 +85,6 @@ public class AuthenticationController {
         }
 
         User existingUser = userOptional.get();
-        System.out.println("👤 Utilisateur: " + existingUser.getEmail() + ", present: " + existingUser.isPresent() + ", active: " + existingUser.isActive());
         try {
             System.out.println("🔄 Authentification en cours...");
             User authenticatedUser = authenticationService.authenticate(loginUserDto);
@@ -131,6 +130,10 @@ public class AuthenticationController {
             } else if (authenticatedUser.getClient() != null) {
                 userDto.setSenderRole(SenderRole.CLIENT);
                 Optional<Client> client=clientRepository.findById(authenticatedUser.getClient().getId());
+                System.out.println("okkkkkk");
+                System.out.println(client.get().getFirstname());
+                System.out.println(client.get().getLastname());
+                System.out.println(client.get().getDenomination());
                 userDto.setIdClient(authenticatedUser.getClient().getId());
                 userDto.setName(client.get().getFullName());
                 if(client.isPresent()) {

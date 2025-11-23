@@ -61,7 +61,7 @@ public class Client{
     public String getFullName()
     {
         String identite="";
-        if(this.getDenomination()==null)
+        if(this.getDenomination()==null || this.getDenomination()=="")
         {
             identite=this.getFirstname()+" "+this.getLastname();
         }else {
