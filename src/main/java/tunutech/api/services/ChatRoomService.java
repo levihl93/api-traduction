@@ -9,6 +9,8 @@ public interface ChatRoomService {
     ChatRoom createOrGetChatRoom(Client client, Traducteur traducteur,Project project);
     ChatRoom createAdminClientChatRoom(Client client, Project project,User admin);
     ChatRoom createAdminClientChatRoomContract(Client client, Project project,User admin);
+    ChatRoom createAdminTraducteurProject(User admin, Project project,Traducteur traducteur);
+    Optional <ChatRoom>  findByAdminTraducteurProject(User admin, Project project,Traducteur traducteur);
     ChatRoom createTRaducteurClientChatRoom(Client client, Project project,User user);
     User getUserofChatAndClientAndChatStatuts(Client client,Project project,ChatStatus chatStatus);
     ChatRoom createClientAdminChatRoom(Client client,User user,Project project);

@@ -51,6 +51,16 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    public ChatRoom createAdminTraducteurProject(User admin, Project project, Traducteur traducteur) {
+        return null;
+    }
+
+    @Override
+    public Optional<ChatRoom> findByAdminTraducteurProject(User admin, Project project, Traducteur traducteur) {
+        return Optional.empty();
+    }
+
+    @Override
     public ChatRoom createTRaducteurClientChatRoom(Client client, Project project, User user) {
         String roomId;
        roomId=this.CreateCode(client,user,project);
