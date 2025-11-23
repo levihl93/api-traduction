@@ -132,8 +132,9 @@ public class AuthenticationController {
                 userDto.setSenderRole(SenderRole.CLIENT);
                 Optional<Client> client=clientRepository.findById(authenticatedUser.getClient().getId());
                 userDto.setIdClient(authenticatedUser.getClient().getId());
+                userDto.setName("SQNNI KQRQMI Gnon Judith");
                 if(client.isPresent()) {
-                    userDto.setName(client.get().getFullName());
+                    //userDto.setName(client.get().getFullName());
                 }
             }
 
