@@ -133,10 +133,11 @@ public class AuthenticationController {
                 userDto.setIdClient(authenticatedUser.getClient().getId());
 
                 if(client.isPresent()) {
-                    if(!(client.get().getDenomination()==null))
+                    userDto.setName(client.get().getFullName());
+                    /*if(!(client.get().getDenomination()==null))
                     {
                         userDto.setName(client.get().getFirstname()+" "+client.get().getLastname()+client.get().getDenomination());
-                    }else {userDto.setName(client.get().getFirstname()+" "+client.get().getLastname());}
+                    }else {userDto.setName(client.get().getFirstname()+" "+client.get().getLastname());}*/
 
                 }
             }

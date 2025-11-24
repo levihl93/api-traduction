@@ -58,15 +58,12 @@ public class Client{
     @Column(name = "updated_At")
     private Date update_At;
 
-    public String getFullName()
-    {
-        String identite="";
-        if(this.getDenomination()==null || this.getDenomination()=="")
-        {
-            identite=this.getFirstname()+" "+this.getLastname();
-        }else {
-            identite=this.getDenomination();
+    public String getFullName() {
+        // ✅ Plus robuste avec StringUtils ou isEmpty()
+        if(this.getDenomination() == null || this.getDenomination().isEmpty()) {
+            return this.getFirstname() + " " + this.getLastname();
+        } else {
+            return this.getDenomination();
         }
-        return  identite;
     }
 }
