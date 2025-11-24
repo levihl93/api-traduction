@@ -15,6 +15,7 @@ import tunutech.api.model.DocumentStatus;
 import tunutech.api.model.Project;
 import tunutech.api.repositories.DocumentRepository;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,61 +34,36 @@ import java.util.UUID;
 @Transactional
 @Slf4j
 public class DocumentService {
-
-    // Configuration multi-environnement
-    @Value("${app.storage.root-path:./documents}")
+    @Value("${app.storage.root-path:./documents}")  // ← Maintenant ça fonctionne
     private String rootStoragePath;
 
-    @Value("${app.storage.local.windows-path:D:/Engenniering/WEB/Projets/projet_traduction_trilangue/api/documents/}")
-    private String windowsPath;
-
-    @Value("${app.storage.local.linux-path:./uploads/documents}")
-    private String linuxPath;
-
-    @Value("${app.storage.max-file-size:10485760}")
+    @Value("${app.storage.max-file-size:10485760}") // 10MB par défaut
     private long maxFileSize;
 
     @Autowired
     private DocumentRepository documentRepository;
 
     /**
-     * Détecte automatiquement l'environnement
-     */
-    private String getActualStoragePath() {
-        String os = System.getProperty("os.name").toLowerCase();
-
-        if (os.contains("win")) {
-            log.info("Environnement Windows détecté - Stockage: {}", windowsPath);
-            return windowsPath;
-        } else {
-            log.info("Environnement Linux détecté - Stockage: {}", linuxPath);
-            return linuxPath;
-        }
-    }
-
-    /**
      * Enregistre un document sur le serveur
      */
     public Document storeDocument(MultipartFile file, Project project,
-                                  String category, Float wordscount) {
+                                   String category,Float wordscount) {
 
+        // Validation du fichier
         validateFile(file);
 
         try {
-            // Utiliser le chemin adapté à l'environnement
-            String actualRootPath = getActualStoragePath();
-
             // 1. Préparer la structure de dossiers
-            Path filePath = prepareStoragePath(actualRootPath, project.getCode(), category, file.getOriginalFilename());
+            Path filePath = prepareStoragePath(project.getCode(), category, file.getOriginalFilename());
 
             // 2. Sauvegarder le fichier physique
             saveFileToDisk(file, filePath);
 
             // 3. Enregistrer en base de données
-            Document document = saveDocumentMetadata(file, filePath, project, category, wordscount);
+            Document document = saveDocumentMetadata(file, filePath, project, category,wordscount);
 
-            log.info("Document enregistré: {} pour le projet {} - Chemin: {}",
-                    file.getOriginalFilename(), project.getCode(), filePath);
+            log.info("Document enregistré: {} pour le client {}",
+                    file.getOriginalFilename(), project.getCode());
 
             return document;
 
@@ -95,30 +71,6 @@ public class DocumentService {
             log.error("Erreur lors de l'enregistrement du document", e);
             throw new DocumentStorageException("Erreur stockage document: " + e.getMessage());
         }
-    }
-
-    /**
-     * Prépare le chemin de stockage avec chemin dynamique
-     */
-    private Path prepareStoragePath(String basePath, String projectCode, String category, String originalFilename) {
-        // Structure: {base-path}/projets/{client}/{category}/année/mois/jour/
-        LocalDate now = LocalDate.now();
-        String year = String.valueOf(now.getYear());
-        String month = String.format("%02d", now.getMonthValue());
-        String day = String.format("%02d", now.getDayOfMonth());
-
-        Path storagePath = Paths.get(basePath, "projets", projectCode, category, year, month, day);
-
-        try {
-            Files.createDirectories(storagePath);
-            log.debug("Dossier créé: {}", storagePath.toAbsolutePath());
-        } catch (IOException e) {
-            throw new DocumentStorageException("Impossible de créer le dossier: " + storagePath);
-        }
-
-        // Générer nom de fichier unique
-        String uniqueFilename = generateUniqueFilename(originalFilename);
-        return storagePath.resolve(uniqueFilename);
     }
 
     /**
@@ -147,11 +99,38 @@ public class DocumentService {
     }
 
     /**
+     * Prépare le chemin de stockage
+     */
+    private Path prepareStoragePath(String projectCode, String category, String originalFilename) {
+        // Structure: /racine/clients/{client}/{category}/année/mois/jour/
+        LocalDate now = LocalDate.now();
+        String year = String.valueOf(now.getYear());
+        String month = String.format("%02d", now.getMonthValue());
+        String day = String.format("%02d", now.getDayOfMonth());
+
+        Path storagePath = Paths.get(rootStoragePath,
+                "projets", projectCode, category, year, month, day);
+
+        try {
+            Files.createDirectories(storagePath);
+            log.debug("Dossier créé: {}", storagePath);
+        } catch (IOException e) {
+            throw new DocumentStorageException("Impossible de créer le dossier: " + storagePath);
+        }
+
+        // Générer nom de fichier unique
+        String uniqueFilename = generateUniqueFilename(originalFilename);
+        return storagePath.resolve(uniqueFilename);
+    }
+
+    /**
      * Sauvegarde physique du fichier
      */
     private void saveFileToDisk(MultipartFile file, Path filePath) throws IOException {
+        // Copie avec vérification
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
+        // Vérifier que le fichier a bien été écrit
         if (!Files.exists(filePath) || Files.size(filePath) == 0) {
             throw new DocumentStorageException("Échec de l'écriture du fichier");
         }
@@ -164,15 +143,11 @@ public class DocumentService {
      * Enregistrement des métadonnées en BDD
      */
     private Document saveDocumentMetadata(MultipartFile file, Path filePath,
-                                          Project project, String category, Float wordscount) {
+                                          Project project,  String category, Float wordscount) {
         Document document = new Document();
         document.setOriginalName(file.getOriginalFilename());
         document.setStoredName(filePath.getFileName().toString());
-
-        // Stocker le chemin RELATIF pour la compatibilité multi-environnement
-        String relativePath = getRelativePath(filePath);
-        document.setFilePath(relativePath);
-
+        document.setFilePath(filePath.toString());
         document.setFileSize(file.getSize());
         document.setContentType(file.getContentType());
         document.setProject(project);
@@ -183,61 +158,6 @@ public class DocumentService {
         document.setChecksum(calculateChecksum(file));
 
         return documentRepository.save(document);
-    }
-
-    /**
-     * Convertit le chemin absolu en chemin relatif
-     */
-    private String getRelativePath(Path absolutePath) {
-        try {
-            String basePath = getActualStoragePath();
-            Path base = Paths.get(basePath);
-            Path relative = base.relativize(absolutePath);
-            return relative.toString();
-        } catch (Exception e) {
-            // En cas d'erreur, garder le chemin absolu
-            return absolutePath.toString();
-        }
-    }
-
-    /**
-     * Téléchargement compatible multi-environnement
-     */
-    public Resource downloadDocument(Long documentId) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document non trouvé"));
-
-        try {
-            String storedFilePath = document.getFilePath();
-
-            // Vérifier si le chemin est absolu ou relatif
-            Path filePath;
-
-            if (Paths.get(storedFilePath).isAbsolute()) {
-                // Chemin absolu (Windows local)
-                filePath = Paths.get(storedFilePath);
-            } else {
-                // Chemin relatif - utiliser le base path adapté
-                String basePath = getActualStoragePath();
-                filePath = Paths.get(basePath).resolve(storedFilePath).normalize();
-            }
-
-            log.info("Tentative de chargement - Chemin: {}", filePath.toAbsolutePath());
-
-            Resource resource = new UrlResource(filePath.toUri());
-
-            if (resource.exists() && resource.isReadable()) {
-                log.info("Fichier trouvé et accessible: {}", filePath.getFileName());
-                return resource;
-            } else {
-                log.error("Fichier non trouvé ou illisible: {}", filePath);
-                throw new RuntimeException("Fichier non trouvé: " + filePath.getFileName());
-            }
-
-        } catch (Exception e) {
-            log.error("Erreur détaillée lors du téléchargement: {}", e.getMessage(), e);
-            throw new RuntimeException("Erreur lors du téléchargement: " + e.getMessage());
-        }
     }
 
     /**
@@ -294,24 +214,78 @@ public class DocumentService {
         return sb.toString();
     }
 
-    // Méthodes de recherche existantes
-    public Document getUniquebyIdProject(Long idproject) {
-        return documentRepository.findByProjectId(idproject);
+    public Document getUniquebyIdProject(Long idproject)
+    {
+        return  documentRepository.findByProjectId(idproject);
     }
-
-    public Optional<Document> getUniquebyId(Long iddoc) {
-        return documentRepository.findById(iddoc);
+    public Optional<Document> getUniquebyId(Long iddoc)
+    {
+        return  documentRepository.findById(iddoc);
     }
-
-    public List<Document> ListbyIdProject(Long idproject) {
-        return documentRepository.findDocumentsByProjectId(idproject);
+    public List<Document> ListbyIdProject(Long idproject)
+    {
+        return  documentRepository.findDocumentsByProjectId(idproject);
     }
 
     public Optional<Document> findById(Long id) {
         return documentRepository.findById(id);
     }
 
-    public void deleteDocOnBdd(Project project) {
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    public Resource downloadDocument(Long documentId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document non trouvé"));
+
+        try {
+            String cheminRelatif = document.getFilePath();
+
+            // Nettoyer le chemin
+            if (cheminRelatif.startsWith(".\\")) {
+                cheminRelatif = cheminRelatif.substring(2);
+            }
+
+            // Afficher pour debug
+            System.out.println("Upload dir: " + uploadDir);
+            System.out.println("Chemin relatif: " + cheminRelatif);
+
+            // SOLUTION GARANTIE : Utiliser Paths.get() correctement
+            Path basePath = Paths.get(uploadDir);
+            Path relativePath = Paths.get(cheminRelatif);
+            Path cheminComplet = basePath.resolve(relativePath).normalize();
+
+            System.out.println("Chemin complet: " + cheminComplet);
+            System.out.println("Chemin absolu: " + cheminComplet.toAbsolutePath());
+
+            // Vérifier si le fichier existe
+            if (!Files.exists(cheminComplet)) {
+                System.out.println("FICHIER N'EXISTE PAS à cet emplacement!");
+                // Liste les fichiers dans le dossier parent pour debug
+                Path parentDir = cheminComplet.getParent();
+                if (Files.exists(parentDir)) {
+                    System.out.println("Fichiers dans " + parentDir + ":");
+                    Files.list(parentDir).forEach(file -> System.out.println(" - " + file.getFileName()));
+                }
+            }
+
+            Resource resource = new UrlResource(cheminComplet.toUri());
+
+            if (resource.exists()) {
+                return resource;
+            } else {
+                throw new RuntimeException("Fichier non trouvé: " + cheminComplet);
+            }
+
+        } catch (Exception e) {
+            System.out.println("ERREUR DETAIL: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erreur: " + e.getMessage());
+        }
+    }
+
+    public void deleteDocOnBdd(Project project)
+    {
         documentRepository.deleteByProject(project);
     }
 }
