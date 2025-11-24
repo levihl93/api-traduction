@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import tunutech.api.repositories.ProjetLangueSourceRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -63,7 +64,10 @@ public class Project {
     private Boolean annuler=false;
 
     @Column(nullable = false)
-    private Boolean terminer=false;
+    private Boolean end=false;
+
+ @Column(nullable = true)
+  private LocalDateTime end_At;
 
     @Column(nullable = false)
     private Date datevoulue;

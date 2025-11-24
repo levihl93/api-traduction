@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 import tunutech.api.model.ChatStatus;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +19,8 @@ public class ChatRoomResponse {
     private String projectTitle;
     private String clientName;
     private String traducteurName;
+    private Boolean end;
+    private LocalDateTime endAt;
     private ChatStatus status;
     private Date createdAt;
     private ChatMessageResponse lastMessage;

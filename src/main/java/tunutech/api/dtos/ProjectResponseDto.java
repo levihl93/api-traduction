@@ -28,7 +28,8 @@ public class ProjectResponseDto {
     private String sourceslangues;
     private String targetlangues;
     private  Double progress;
-    private Boolean terminer;
+    private Boolean end;
+    private LocalDateTime endAt;
     private Date startDate;
     private String identiteclient;
     private List<Document> documentlist;

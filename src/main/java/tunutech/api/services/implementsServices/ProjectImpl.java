@@ -154,7 +154,7 @@ public class ProjectImpl implements ProjetService {
 
     @Override
     public List<Project> Listterminer(Boolean terminer) {
-        return projectRepository.findByTerminer(terminer);
+        return projectRepository.findByEnd(terminer);
     }
 
     @Override
@@ -243,7 +243,8 @@ public class ProjectImpl implements ProjetService {
             projectResponseDto.setEstimatedPrice(project.getEstimatedPrice());
             projectResponseDto.setPricePerWord(project.getPriceperWord());
             projectResponseDto.setAnnuler(project.getAnnuler());
-            projectResponseDto.setTerminer(project.getTerminer());
+            projectResponseDto.setEndAt(project.getEnd_At());
+            projectResponseDto.setEnd(project.getEnd());
             projectResponseDto.setDocumentlist(documentlist);
 
             if(traducteur!=null && traducteur.isPresent())

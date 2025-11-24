@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Table(name = "chatroom")
@@ -20,6 +21,12 @@ public class ChatRoom {
 
     @Column(nullable = false,unique = true)
     private String roomId;
+
+    @Column(nullable = false)
+    private Boolean end=false;
+
+    @Column(nullable = true)
+    private LocalDateTime end_At;
 
     @JoinColumn(name = "idclient",nullable = true)
     @ManyToOne(optional = true)

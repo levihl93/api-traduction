@@ -22,7 +22,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     List<ChatRoom> findByTraducteurAndChatStatus(Traducteur user, ChatStatus preContract);
     Optional <ChatRoom> findByClientAndChatStatusAndProject(Client client,ChatStatus preContract,Project project);
-
     List<ChatRoom> findByClientAndChatStatus(Client user, ChatStatus active);
 
     ChatRoom findByClientAndTraducteurAndChatStatus(Client client, Traducteur traducteur, ChatStatus chatStatus);
@@ -37,9 +36,16 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
                                     @Param("userId") Long userId);
 
     // Méthodes pour les recherches courantes
-    @Query("SELECT cr FROM ChatRoom cr WHERE cr.client.id = :userId AND cr.chatStatus = 'ACTIVE'")
+    @Query("SELECT cr FROM ChatRoom cr WHERE cr.client.id = :userId AND cr.end =false ")
     List<ChatRoom> findActiveChatRoomsByClient(@Param("userId") Long userId);
 
-    @Query("SELECT cr FROM ChatRoom cr WHERE cr.traducteur.id = :userId AND cr.chatStatus = 'ACTIVE'")
+    @Query("SELECT cr FROM ChatRoom cr WHERE cr.traducteur.id = :userId AND cr.end = false ")
     List<ChatRoom> findActiveChatRoomsByTraducteur(@Param("userId") Long userId);
+
+    // Méthodes pour les recherches courantes
+    @Query("SELECT cr FROM ChatRoom cr WHERE cr.client.id = :userId AND cr.end =true ")
+    List<ChatRoom> findEndChatRoomsByClient(@Param("userId") Long userId);
+
+    @Query("SELECT cr FROM ChatRoom cr WHERE cr.traducteur.id = :userId AND cr.end = true ")
+    List<ChatRoom> findEndChatRoomsByTraducteur(@Param("userId") Long userId);
 }
