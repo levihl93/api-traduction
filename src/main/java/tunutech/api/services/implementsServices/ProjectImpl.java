@@ -3,6 +3,7 @@ package tunutech.api.services.implementsServices;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tunutech.api.Utils.DateComparisonUtils;
 import tunutech.api.dtos.ActivityDTO;
 import tunutech.api.dtos.ProjectDto;
 import tunutech.api.dtos.ProjectResponseDto;
@@ -14,6 +15,7 @@ import tunutech.api.repositories.*;
 import tunutech.api.services.*;
 import tunutech.api.Utils.Functions;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -61,6 +63,19 @@ public class ProjectImpl implements ProjetService {
     }
 
     @Override
+    public List<Project> listallofClientPresent() {
+        List <Project>projectlist=new ArrayList<>();
+        for(Project project:this.listall())
+        {
+            if(project.getClient().getPresent())
+            {
+                projectlist.add(project);
+            }
+        }
+        return projectlist;
+    }
+
+    @Override
     public Double calculerMontantAutomatique(Project projet,String projectComplexity,String documentType) {
         try {
             Tarif tarif = priceRepository.findByTypeDocument(TypeDocument.valueOf(documentType));
@@ -98,6 +113,19 @@ public class ProjectImpl implements ProjetService {
     }
 
     @Override
+    public List<Project> listofPeriode(LocalDate d1, LocalDate d2) {
+        List<Project>projectList=new ArrayList<>();
+        for(Project project:this.listall())
+        {
+           if(DateComparisonUtils.isBetweenDate(project.getCreatedAt(),d1,d2))
+           {
+               projectList.add(project);
+           }
+        }
+        return projectList;
+    }
+
+    @Override
     public String getLanguesSources(Project project) {
             String languesosurces="";
             Integer intr=0;
@@ -114,6 +142,13 @@ public class ProjectImpl implements ProjetService {
                 }
             }
             return languesosurces;
+    }
+
+    @Override
+    public List<Langue> getLanguesSourcesLangues(Project project) {
+        List<Langue> langueSources=new ArrayList<Langue>();
+        langueSources=projetLangueSourceService.Listofproject(project.getId());
+        return langueSources;
     }
 
     @Override
@@ -137,6 +172,13 @@ public class ProjectImpl implements ProjetService {
     }
 
     @Override
+    public List<Langue> getLanguesCiblesLangues(Project project) {
+        List<Langue> langueCibles=new ArrayList<Langue>();
+        langueCibles=projetLangueCibleService.Listofproject(project.getId());
+        return langueCibles;
+    }
+
+    @Override
     public List<Project> ListofClient(Long idclient) {
         return projectRepository.findByClientId(idclient);
     }
@@ -154,7 +196,7 @@ public class ProjectImpl implements ProjetService {
 
     @Override
     public List<Project> Listterminer(Boolean terminer) {
-        return projectRepository.findByEnd(terminer);
+        return projectRepository.findByIsEnd(terminer);
     }
 
     @Override
@@ -244,7 +286,7 @@ public class ProjectImpl implements ProjetService {
             projectResponseDto.setPricePerWord(project.getPriceperWord());
             projectResponseDto.setAnnuler(project.getAnnuler());
             projectResponseDto.setEndAt(project.getEnd_At());
-            projectResponseDto.setEnd(project.getEnd());
+            projectResponseDto.setEnd(project.getIsEnd());
             projectResponseDto.setDocumentlist(documentlist);
 
             if(traducteur!=null && traducteur.isPresent())

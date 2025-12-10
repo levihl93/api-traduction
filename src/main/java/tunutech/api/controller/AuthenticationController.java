@@ -76,12 +76,9 @@ public class AuthenticationController {
         System.out.println("🔐 Tentative de connexion pour: " + loginUserDto.getEmail());
         // Vérifier d'abord si l'utilisateur existe
         Optional<User> userOptional = authenticationService.loadByemail(loginUserDto.getEmail());
-        System.out.println("📦 Utilisateur trouvé: " + userOptional.isPresent());
         if (!userOptional.isPresent()) {
-            System.out.println("❌ Utilisateur non trouvé");
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Utilisateur non reconnu");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Utilisateur non reconnu");
         }
 
         User existingUser = userOptional.get();
@@ -92,16 +89,13 @@ public class AuthenticationController {
 
             // CORRECTION : Vérifier si l'utilisateur est présent (pas supprimé)
             if(!existingUser.isPresent()) { // Utilise le champ boolean 'present' de ton User
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "your account is deleted");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("your account is deleted");
             }
 
             // CORRECTION : Vérifier si l'utilisateur est actif
             if(!existingUser.isActive()) { // Utilise le champ boolean 'active' de ton User
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "your account is not actived");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("your account is not actived");
             }
 
             // Le reste de ton code inchangé
@@ -155,19 +149,14 @@ public class AuthenticationController {
             return ResponseEntity.ok(loginResponse);
 
         } catch (BadCredentialsException ex) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Mot de pass incorrect");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-
+           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Mot de passe incorrect");
         } catch (UsernameNotFoundException | NoSuchElementException ex) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "User not found");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         } catch (Exception ex) {
             ex.printStackTrace(); // ✅ IMPORTANT pour voir l'erreur
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Une erreur est survenue: " + ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur est survenue: " + ex.getMessage());
         }
     }
 

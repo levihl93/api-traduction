@@ -64,7 +64,7 @@ public class Project {
     private Boolean annuler=false;
 
     @Column(nullable = false)
-    private Boolean end=false;
+    private Boolean isEnd=false;
 
  @Column(nullable = true)
   private LocalDateTime end_At;

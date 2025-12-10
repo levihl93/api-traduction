@@ -48,6 +48,10 @@ public List<Traducteur> getallTraducteursPresentandActive(){return traducteurSer
 public List<Traducteur> getallTraducteursPresents(){
         return traducteurService.getAllPresent();
     }
+    @GetMapping("allCountriesOfTranslators")
+public List<PaysResponsDTO> getallCountriesOfTraducteursPresents(){
+        return traducteurService.getCountryListTranslator(this.getallTraducteursPresents());
+    }
     @GetMapping("allactive")
 public List<Traducteur> getallTraducteursActive(){
         return traducteurService.getAllActive();

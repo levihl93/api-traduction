@@ -3,6 +3,7 @@ package tunutech.api.services.implementsServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import tunutech.api.dtos.PaysResponsDTO;
 import tunutech.api.dtos.TraducteurDto;
 import tunutech.api.dtos.TraducteurResponseDto;
 import tunutech.api.model.ActivityType;
@@ -71,6 +72,32 @@ public class TraductionImpl implements TraducteurService {
 
         }
         return traducteurList;
+    }
+
+    @Override
+    public List<PaysResponsDTO> getCountryListTranslator(List<Traducteur> list) {
+        List<String>listresults=new ArrayList<>();
+        List<PaysResponsDTO>listresultend=new ArrayList<>();
+        boolean already=false;
+        for(Traducteur traducteur:list)
+            {
+                already=false;
+                for(String pays:listresults)
+                {
+                    if(pays.equals(traducteur.getPays()))
+                    {
+                        already=true;
+                    }
+                }
+                if(!already)
+                {
+                    PaysResponsDTO paysResponsDTO=new PaysResponsDTO();
+                    paysResponsDTO.setName(traducteur.getPays());
+                    listresultend.add(paysResponsDTO);
+                    listresults.add(traducteur.getPays());
+                }
+            }
+                return listresultend;
     }
 
     @Override

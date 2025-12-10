@@ -3,9 +3,11 @@ package tunutech.api.services;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import tunutech.api.dtos.ActivityDTO;
+import tunutech.api.model.Activity;
 import tunutech.api.model.ActivityType;
 import tunutech.api.model.User;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,7 @@ public interface ActivityService {
     Page<ActivityDTO> getUserActivities(Long userId, Pageable pageable);
     Page<ActivityDTO> getProjectActivities(Long projectId, Pageable pageable);
     List<ActivityDTO> getActivitiesByType(ActivityType type);
+    List<Activity> getActivitiesInPeriod(LocalDate date1, LocalDate date2);
     List<ActivityDTO> getRecentActivities(int limit);
     List<ActivityDTO> getRecentActivitiesOfProject(int limit,Long idproject);
     ActivityDTO getActivityById(Long activityId); // AJOUTÉE

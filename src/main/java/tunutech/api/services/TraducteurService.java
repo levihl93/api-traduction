@@ -1,5 +1,6 @@
 package tunutech.api.services;
 
+import tunutech.api.dtos.PaysResponsDTO;
 import tunutech.api.dtos.TraducteurDto;
 import tunutech.api.dtos.TraducteurResponseDto;
 import tunutech.api.model.Langue;
@@ -14,6 +15,7 @@ public interface TraducteurService {
     List<Traducteur> getAllPresent();
     List<Traducteur> getAllActive();
     List<Traducteur> getAllDisponible(List<Langue> langueList);
+    List<PaysResponsDTO> getCountryListTranslator(List<Traducteur> traducteurList);
     Boolean ifTraducteurEligibleLangue(Traducteur traducteur, Langue langue);
     List<Traducteur> getAllPresentAndActive();
     Boolean ifClientisPresent(String email);

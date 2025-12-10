@@ -198,13 +198,12 @@ public class ProjectController {
 
             if(!(file.getOriginalFilename()==""))
             {
-                documentService.deleteDocOnBdd(project);
-                document = documentService.storeDocument(file, project,category,wordscount);
+                    documentService.deleteDocOnBdd(project);
+                    document = documentService.storeDocument(file, project,category,wordscount);
             }else {
                     document=documentService.getUniquebyIdProject(project.getId());
             }
-
-            DocumentResponse response = DocumentResponse.builder()
+                    DocumentResponse response = DocumentResponse.builder()
                     .id(document.getId())
                     .originalName(document.getOriginalName())
                     .storedName(document.getStoredName())
@@ -270,6 +269,16 @@ public class ProjectController {
     public ResponseEntity<?>getlist()
     {
         List<ProjectResponseDto> listprojectresponse = projetService.listall()
+                .stream()
+                .map(projetService::mapProject)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(listprojectresponse);
+    }
+
+    @GetMapping("listallforClientPresent")
+    public ResponseEntity<?>getlistClientPresent()
+    {
+        List<ProjectResponseDto> listprojectresponse = projetService.listallofClientPresent()
                 .stream()
                 .map(projetService::mapProject)
                 .collect(Collectors.toList());

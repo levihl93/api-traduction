@@ -88,7 +88,7 @@ public class ProjetTraducteurServiceImpl implements ProjetTraducteurService {
         List<Project> projectList=new ArrayList<>();
         for(Project project:this.listOfTraducteur(traducteur))
         {
-            if(project.getEnd())
+            if(project.getIsEnd())
             {
                 projectList.add(project);
             }

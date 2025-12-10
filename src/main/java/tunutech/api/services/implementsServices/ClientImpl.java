@@ -4,11 +4,17 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tunutech.api.Utils.DateComparisonUtils;
 import tunutech.api.dtos.ClientDto;
-import tunutech.api.model.Client;
+import tunutech.api.dtos.PaysResponsDTO;
+import tunutech.api.model.*;
 import tunutech.api.repositories.ClientRepository;
+import tunutech.api.repositories.UserRepository;
+import tunutech.api.services.ActivityService;
 import tunutech.api.services.ClientService;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +22,12 @@ import java.util.Optional;
 public class ClientImpl implements ClientService {
     @Autowired
     private ClientRepository clientRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ActivityService activityService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -27,6 +39,45 @@ public class ClientImpl implements ClientService {
     @Override
     public List<Client> allclientPresent(Boolean present) {
         return clientRepository.findByPresent(present);
+    }
+
+    @Override
+    public List<Client> allClientCreatedAtPeriode(LocalDate date1, LocalDate date2,List<Client> list) {
+        List<Client>clientList=new ArrayList<>();
+        for(Client client:list)
+        {
+            if(DateComparisonUtils.isBetweenDate(client.getCreated_At(),date1,date2))
+            {
+                clientList.add(client);
+            }
+        }
+        return clientList;
+    }
+
+    @Override
+    public List<PaysResponsDTO> allCountryclientPresent(List<Client> clientList) {
+        List<String>listresults=new ArrayList<>();
+        List<PaysResponsDTO>listresultend=new ArrayList<>();
+        boolean already=false;
+        for(Client client:clientList)
+        {
+            already=false;
+            for(String pays:listresults)
+            {
+                if(pays.equals(client.getPays()))
+                {
+                    already=true;
+                }
+            }
+            if(!already)
+            {
+                PaysResponsDTO paysResponsDTO=new PaysResponsDTO();
+                paysResponsDTO.setName(client.getPays());
+                listresultend.add(paysResponsDTO);
+                listresults.add(client.getPays());
+            }
+        }
+        return listresultend;
     }
 
     @Override
@@ -103,4 +154,50 @@ public class ClientImpl implements ClientService {
     public Long Number0fClients() {
         return clientRepository.count();
     }
+
+    private Client getClientofUser(Long idUser)
+    {
+        Optional<User> user=userRepository.findById(Integer.valueOf(Math.toIntExact(idUser)));
+        if(user.isPresent())
+        {
+            if(user.get().getClient()!=null)
+            {
+                return user.get().getClient();
+            }
+        }
+        return null;
+    }
+    @Override
+    public List<Client> getClientsActivityofPeriode( List<Activity> activityList)
+    {
+        List<Client> clientList=new ArrayList<>();
+        for(Activity activity:activityList)
+        {
+            if(activity.getUserRole().equals(RoleUser.CLIENT))
+            {
+                Boolean deja=false;
+                for(Client client:clientList)
+                {
+                    Optional<User> user=userRepository.findByClientId(client.getId());
+                    if(user.isPresent())
+                    {
+                        if(user.get().getId()==activity.getUserId())
+                        {
+                            deja=true;
+                        }
+                    }
+                }
+                if(!deja)
+                {
+                    if(getClientofUser(activity.getUserId())!=null)
+                    {
+                        clientList.add(getClientofUser(activity.getUserId()));
+                    }
+
+                }
+            }
+        }
+        return  clientList;
+    }
+
 }

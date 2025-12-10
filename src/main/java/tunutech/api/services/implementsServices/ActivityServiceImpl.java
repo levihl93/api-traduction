@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import tunutech.api.Utils.DateComparisonUtils;
 import tunutech.api.dtos.ActivityDTO;
 import tunutech.api.exception.ActivityNotFoundException;
 import tunutech.api.exception.ActivityServiceException;
@@ -14,11 +15,9 @@ import tunutech.api.model.*;
 import tunutech.api.repositories.ActivityRepository;
 import tunutech.api.services.ActivityService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -275,6 +274,30 @@ public class ActivityServiceImpl implements ActivityService {
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Activity> getActivitiesInPeriod(LocalDate date1, LocalDate date2) {
+        List<Activity>activityList=new ArrayList<>();
+        for(Activity activity:this.activityRepository.findAll())
+        {
+            if(DateComparisonUtils.isBetweenDateLocalDateTime(activity.getCreatedAt(),date1,date2))
+            {
+                Boolean dja=false;
+                for(Activity activity1:activityList)
+                {
+                    if(activity1.getId()==activity.getId())
+                    {
+                        dja=true;
+                    }
+                }
+                if(!dja)
+                {
+                    activityList.add(activity);
+                }
+            }
+        }
+        return activityList;
     }
 
     @Override

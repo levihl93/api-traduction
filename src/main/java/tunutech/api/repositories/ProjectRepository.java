@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
-    List<Project> findByEnd(Boolean terminer);
+    List<Project> findByIsEnd(Boolean terminer);
     List<Project> findByValider(Boolean valider);
     List<Project>findByClientId(Long id);
     Project findByCode(String code);

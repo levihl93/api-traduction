@@ -37,6 +37,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/ws-chat/**").permitAll()
                         // AJOUTEZ CES LIGNES POUR AUTORISER L'ACCÈS PUBLIC :
                         .requestMatchers("/").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/traductionapi/v1").permitAll()
                         .requestMatchers("/traductionapi/v1/").permitAll()
                         .requestMatchers("/traductionapi/v1/ws-chat/**").permitAll()

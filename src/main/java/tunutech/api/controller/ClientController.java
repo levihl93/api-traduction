@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tunutech.api.dtos.ClientDto;
+import tunutech.api.dtos.PaysResponsDTO;
 import tunutech.api.dtos.RegisterUserDto;
 import tunutech.api.dtos.TraducteurDto;
 import tunutech.api.model.Client;
@@ -43,6 +44,11 @@ public class ClientController {
     {
         return clientService.allclientPresent(true);
     }
+    @GetMapping("allCountriesOfClients")
+    public List<PaysResponsDTO> getallCountriesOfTraducteursPresents(){
+        return clientService.allCountryclientPresent(this.getAllClientPresent());
+    }
+
     @GetMapping("getUnique/{idclient}")
     public ResponseEntity<?> getInfo(@PathVariable Long idclient) throws Exception {
         Client client=clientService.getUnique(idclient);
@@ -69,7 +75,6 @@ public class ClientController {
         User user=userService.getByEmailByForce(client.getEmail());
         user.setPresent(clientDto.getPresent());
         userRepository.save(user);
-        //return ResponseEntity.ok(user.getEmail());
         return ResponseEntity.ok("Opération effectué avec succès");
     }
     @PatchMapping("setactif")
