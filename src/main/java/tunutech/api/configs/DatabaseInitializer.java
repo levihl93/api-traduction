@@ -1,4 +1,4 @@
-package tunutech.api.configs;
+/*package tunutech.api.configs;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -122,4 +122,4 @@ public class DatabaseInitializer {
             System.out.println("❌ Erreur ajout contraintes: " + e.getMessage());
         }
     }
-}
+}*/

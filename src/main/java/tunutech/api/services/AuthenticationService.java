@@ -77,7 +77,6 @@ public class AuthenticationService {
                         input.getPassword()
                 )
         );
-        System.out.println("SANNI KARAMI Gnon Judith");
 
         return userRepository.findByEmail(input.getEmail())
                 .orElseThrow();

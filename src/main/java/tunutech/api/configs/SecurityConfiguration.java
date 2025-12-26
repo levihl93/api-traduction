@@ -34,6 +34,7 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Activer CORS
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/client/registration").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
                         // AJOUTEZ CES LIGNES POUR AUTORISER L'ACCÈS PUBLIC :
                         .requestMatchers("/").permitAll()

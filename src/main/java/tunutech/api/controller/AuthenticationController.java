@@ -73,7 +73,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody LoginUserDto loginUserDto) {
-        System.out.println("🔐 Tentative de connexion pour: " + loginUserDto.getEmail());
+        //System.out.println("🔐 Tentative de connexion pour: " + loginUserDto.getEmail());
         // Vérifier d'abord si l'utilisateur existe
         Optional<User> userOptional = authenticationService.loadByemail(loginUserDto.getEmail());
         if (!userOptional.isPresent()) {
@@ -83,9 +83,7 @@ public class AuthenticationController {
 
         User existingUser = userOptional.get();
         try {
-            System.out.println("🔄 Authentification en cours...");
             User authenticatedUser = authenticationService.authenticate(loginUserDto);
-            System.out.println("✅ Authentification réussie");
 
             // CORRECTION : Vérifier si l'utilisateur est présent (pas supprimé)
             if(!existingUser.isPresent()) { // Utilise le champ boolean 'present' de ton User
@@ -128,17 +126,12 @@ public class AuthenticationController {
 
                 if(client.isPresent()) {
                     userDto.setName(client.get().getFullName());
-                    /*if(!(client.get().getDenomination()==null))
-                    {
-                        userDto.setName(client.get().getFirstname()+" "+client.get().getLastname()+client.get().getDenomination());
-                    }else {userDto.setName(client.get().getFirstname()+" "+client.get().getLastname());}*/
-
                 }
             }
 
             String accessToken = jwtService.generateToken(authenticatedUser);
             String refreshToken = jwtService.generateRefreshToken(authenticatedUser);
-            System.out.println("le user "+userDto.getAvatarUrl());
+            //System.out.println("le user "+userDto.getAvatarUrl());
 
             LoginResponse loginResponse = new LoginResponse()
                     .setAccessToken(accessToken)
